@@ -1,6 +1,8 @@
 package com.libracore.service;
 
 import com.libracore.entity.Book;
+import com.libracore.exception.BookNotFoundException;
+import com.libracore.exception.DuplicateResourceException;
 import com.libracore.repository.BookRepository;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +23,13 @@ public class BookService {
 
     public Book getBookById(Long id) {
         return bookRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Book not found"));
+                .orElseThrow(() -> new BookNotFoundException("Book not found with id: " + id));
     }
 
     public Book addBook(Book book) {
 
         if (bookRepository.existsByIsbn(book.getIsbn())) {
-            throw new RuntimeException("ISBN already exists");
+            throw new DuplicateResourceException("Book with ISBN already exists.");
         }
 
         return bookRepository.save(book);
