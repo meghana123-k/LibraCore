@@ -1,8 +1,10 @@
 package com.libracore.controller;
 
-import com.libracore.entity.Book;
+import com.libracore.dto.BookRequestDTO;
+import com.libracore.dto.BookResponseDTO;
 import com.libracore.service.BookService;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,29 +20,32 @@ public class BookController {
     }
 
     @GetMapping
-    public List<Book> getAllBooks() {
+    public List<BookResponseDTO> getAllBooks() {
         return bookService.getAllBooks();
     }
 
     @GetMapping("/{id}")
-    public Book getBookById(@PathVariable Long id) {
+    public BookResponseDTO getBookById(@PathVariable Long id) {
         return bookService.getBookById(id);
     }
 
     @PostMapping
-    public Book addBook(@Valid @RequestBody Book book) {
-        return bookService.addBook(book);
+    @ResponseStatus(HttpStatus.CREATED)
+    public BookResponseDTO addBook(@Valid @RequestBody BookRequestDTO dto) {
+        return bookService.addBook(dto);
     }
 
     @PutMapping("/{id}")
-    public Book updateBook(@PathVariable Long id,
-            @Valid @RequestBody Book book) {
-        return bookService.updateBook(id, book);
+    public BookResponseDTO updateBook(
+            @PathVariable Long id,
+            @Valid @RequestBody BookRequestDTO dto) {
+
+        return bookService.updateBook(id, dto);
     }
 
     @DeleteMapping("/{id}")
-    public String deleteBook(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteBook(@PathVariable Long id) {
         bookService.deleteBook(id);
-        return "Book deleted successfully";
     }
 }
