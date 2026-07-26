@@ -7,6 +7,7 @@ import com.libracore.exception.BookNotFoundException;
 import com.libracore.exception.DuplicateResourceException;
 import com.libracore.repository.BookRepository;
 import com.libracore.util.BookMapper;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,11 +21,28 @@ public class BookService {
         this.bookRepository = bookRepository;
     }
 
-    public List<BookResponseDTO> getAllBooks() {
-        return bookRepository.findAll()
-                .stream()
-                .map(BookMapper::toResponse)
-                .toList();
+    public Page<BookResponseDTO> getAllBooks(int page, int size, String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+
+        return bookRepository.findAll(pageable)
+                .map(BookMapper::toResponse);
+    }
+
+    public Page<BookResponseDTO> searchBooks(
+            String keyword,
+            int page,
+            int size,
+            String sortBy) {
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+
+        return bookRepository
+                .findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCase(
+                        keyword,
+                        keyword,
+                        pageable)
+                .map(BookMapper::toResponse);
     }
 
     public BookResponseDTO getBookById(Long id) {
@@ -61,9 +79,7 @@ public class BookService {
         book.setIsbn(dto.getIsbn());
         book.setAvailableCopies(dto.getAvailableCopies());
 
-        Book updatedBook = bookRepository.save(book);
-
-        return BookMapper.toResponse(updatedBook);
+        return BookMapper.toResponse(bookRepository.save(book));
     }
 
     public void deleteBook(Long id) {
