@@ -41,4 +41,14 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(response, status);
     }
+    
+    @ExceptionHandler(BookUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleBookUnavailable(BookUnavailableException ex) {
+        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(DuplicateBookIssueException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateIssue(DuplicateBookIssueException ex) {
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
 }
