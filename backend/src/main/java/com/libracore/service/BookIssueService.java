@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class BookIssueService {
@@ -63,7 +64,45 @@ public class BookIssueService {
 
         bookRepository.save(book);
 
-        return BookIssueMapper.toResponse(
-                issueRepository.save(issue));
+        return BookIssueMapper.toResponse(issueRepository.save(issue));
+    }
+
+    @Transactional
+    public BookIssueResponseDTO returnBook(Long issueId) {
+
+        BookIssue issue = issueRepository.findById(issueId)
+                .orElseThrow(() -> new RuntimeException("Issue record not found"));
+
+        if (issue.getStatus() == IssueStatus.RETURNED) {
+            throw new InvalidBookReturnException(
+                    "Book has already been returned.");
+        }
+
+        issue.setStatus(IssueStatus.RETURNED);
+        issue.setReturnDate(LocalDate.now());
+
+        Book book = issue.getBook();
+
+        book.setAvailableCopies(book.getAvailableCopies() + 1);
+
+        bookRepository.save(book);
+
+        return BookIssueMapper.toResponse(issueRepository.save(issue));
+    }
+
+    public List<BookIssueResponseDTO> getIssuedBooks() {
+
+        return issueRepository.findByStatus(IssueStatus.ISSUED)
+                .stream()
+                .map(BookIssueMapper::toResponse)
+                .toList();
+    }
+
+    public List<BookIssueResponseDTO> getMemberHistory(Long memberId) {
+
+        return issueRepository.findByMemberId(memberId)
+                .stream()
+                .map(BookIssueMapper::toResponse)
+                .toList();
     }
 }

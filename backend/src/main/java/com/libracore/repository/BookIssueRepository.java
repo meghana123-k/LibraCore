@@ -4,6 +4,7 @@ import com.libracore.entity.BookIssue;
 import com.libracore.entity.IssueStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface BookIssueRepository extends JpaRepository<BookIssue, Long> {
@@ -12,4 +13,8 @@ public interface BookIssueRepository extends JpaRepository<BookIssue, Long> {
             Long bookId,
             Long memberId,
             IssueStatus status);
+
+    List<BookIssue> findByStatus(IssueStatus status);
+
+    List<BookIssue> findByMemberId(Long memberId);
 }
